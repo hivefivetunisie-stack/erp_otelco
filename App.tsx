@@ -245,7 +245,7 @@ const App: React.FC = () => {
 
     // Profile listener
     const unsubProfile = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
-      const isAdminEmail = user.email === 'hivefivetunisie@gmail.com';
+      const isAdminEmail = user.email === 'hivefivetunisie@gmail.com' || user.email === 'admin@synergy.com';
       const isManagerEmail = user.email === 'ryadmerarbi18@gmail.com' || user.email === 'dhouha.laserostop@gmail.com';
 
       if (snapshot.exists()) {
