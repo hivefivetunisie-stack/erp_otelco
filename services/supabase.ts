@@ -14,8 +14,8 @@ export interface SupabaseConfig {
 
 // Get config from Env first, fallback to localStorage
 export function getSupabaseConfig(): SupabaseConfig {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_SUPABASE_URL || '';
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SUPABASE_ANON_KEY || '';
 
   return {
     url: envUrl || localStorage.getItem(URL_KEY) || '',
@@ -29,8 +29,8 @@ export function saveSupabaseConfig(config: SupabaseConfig) {
 }
 
 export function getDatabaseProvider(): 'firebase' | 'supabase' {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL;
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SUPABASE_ANON_KEY;
   const defaultProvider = (envUrl && envKey) ? 'supabase' : 'firebase';
 
   const provider = (localStorage.getItem(PROVIDER_KEY) as 'firebase' | 'supabase') || defaultProvider;

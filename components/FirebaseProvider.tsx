@@ -2,8 +2,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
-import { Loader2, LogIn, Lock, Mail, AlertCircle, Database } from 'lucide-react';
-import { getDatabaseProvider, getSupabaseClient } from '../services/supabase';
+import { Loader2, LogIn, Lock, Mail, AlertCircle, Database, Settings, ShieldAlert, CheckCircle2, ChevronDown, ChevronUp, Key } from 'lucide-react';
+import { 
+  getDatabaseProvider, 
+  getSupabaseClient, 
+  getSupabaseConfig, 
+  saveSupabaseConfig, 
+  resetSupabaseClient, 
+  setDatabaseProvider, 
+  testSupabaseConnection 
+} from '../services/supabase';
 
 export interface AuthUser {
   uid: string;
@@ -30,6 +38,21 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+
+  // Supabase connection settings states
+  const [showConfig, setShowConfig] = useState(false);
+  const [sbUrl, setSbUrl] = useState('');
+  const [sbKey, setSbKey] = useState('');
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configSuccess, setConfigSuccess] = useState<string | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
+
+  // Initialize input fields with current config
+  useEffect(() => {
+    const config = getSupabaseConfig();
+    setSbUrl(config.url || '');
+    setSbKey(config.anonKey || '');
+  }, []);
 
   useEffect(() => {
     const currentProvider = getDatabaseProvider();
@@ -196,6 +219,44 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const handleSaveAndActivateSupabase = async () => {
+    if (!sbUrl || !sbKey) {
+      setConfigError("Veuillez remplir l'URL et la clé de sécurité Supabase.");
+      return;
+    }
+    setConfigLoading(true);
+    setConfigError(null);
+    setConfigSuccess(null);
+
+    try {
+      const trimmedUrl = sbUrl.trim();
+      const trimmedKey = sbKey.trim();
+      
+      const res = await testSupabaseConnection(trimmedUrl, trimmedKey);
+      if (res.success) {
+        saveSupabaseConfig({ url: trimmedUrl, anonKey: trimmedKey });
+        resetSupabaseClient();
+        setDatabaseProvider('supabase');
+        setProvider('supabase');
+        setConfigSuccess("Supabase configuré et activé avec succès !");
+        setFormError(null);
+      } else {
+        setConfigError(`Échec de connexion : ${res.message}`);
+      }
+    } catch (err: any) {
+      setConfigError(`Erreur : ${err.message || err}`);
+    } finally {
+      setConfigLoading(false);
+    }
+  };
+
+  const handleSwitchToFirebase = () => {
+    setDatabaseProvider('firebase');
+    setProvider('firebase');
+    setFormError(null);
+    setConfigSuccess("Moteur de base de données configuré sur Firebase Firestore.");
+  };
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login();
@@ -274,11 +335,91 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               ) : (
                 <>
                   <LogIn size={16} />
-                  Se connecter
+                  Se connecter ({provider === 'supabase' ? 'Supabase' : 'Firebase'})
                 </>
               )}
             </button>
           </form>
+
+          <div className="mt-6 pt-5 border-t border-[#F1EFEA]">
+            <button
+              onClick={() => setShowConfig(!showConfig)}
+              className="w-full flex items-center justify-between text-[11px] font-black text-[#1A56DB] uppercase tracking-widest hover:opacity-85 transition-all"
+            >
+              <span className="flex items-center gap-1.5">
+                <Settings size={12} />
+                Configuration Base de Données ({provider === 'supabase' ? 'Supabase' : 'Firebase'})
+              </span>
+              {showConfig ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+
+            {showConfig && (
+              <div className="mt-4 space-y-3 bg-[#F8FAFC] border border-[#E2E8F0] p-4 rounded-2xl text-left">
+                <div>
+                  <label className="block text-[9px] font-black text-[#475569] uppercase tracking-widest mb-1">Supabase API URL</label>
+                  <input
+                    type="text"
+                    placeholder="https://xxx.supabase.co"
+                    value={sbUrl}
+                    onChange={(e) => setSbUrl(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-xs font-medium text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#1A56DB] transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[9px] font-black text-[#475569] uppercase tracking-widest mb-1">Supabase Anon Key (Clé Publique)</label>
+                  <input
+                    type="password"
+                    placeholder="eyJhbGciOi..."
+                    value={sbKey}
+                    onChange={(e) => setSbKey(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-[#CBD5E1] rounded-lg text-xs font-medium text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#1A56DB] transition-all"
+                  />
+                </div>
+
+                {configError && (
+                  <div className="flex items-start gap-1.5 text-[10px] text-[#B91C1C] font-bold">
+                    <ShieldAlert size={12} className="shrink-0 mt-0.5" />
+                    <span>{configError}</span>
+                  </div>
+                )}
+
+                {configSuccess && (
+                  <div className="flex items-start gap-1.5 text-[10px] text-[#15803D] font-bold">
+                    <CheckCircle2 size={12} className="shrink-0 mt-0.5" />
+                    <span>{configSuccess}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleSaveAndActivateSupabase}
+                    disabled={configLoading}
+                    className="flex-1 flex items-center justify-center gap-1 bg-[#1A56DB] text-white py-2 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-[#1e40af] transition-all disabled:opacity-50"
+                  >
+                    {configLoading ? <Loader2 size={10} className="animate-spin" /> : <Key size={10} />}
+                    Activer Supabase
+                  </button>
+
+                  {provider === 'supabase' && (
+                    <button
+                      type="button"
+                      onClick={handleSwitchToFirebase}
+                      className="flex-1 flex items-center justify-center gap-1 bg-[#475569] text-white py-2 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider hover:bg-[#334155] transition-all"
+                    >
+                      <Database size={10} />
+                      Utiliser Firebase
+                    </button>
+                  )}
+                </div>
+                
+                <p className="text-[10px] text-[#64748B] leading-normal pt-2 border-t border-[#EDF2F7]">
+                  💡 <strong>Étape suivante :</strong> Allez sur votre console <strong>Supabase</strong> &gt; <strong>Authentication</strong> &gt; <strong>Users</strong>. Ajoutez un utilisateur avec l'email <strong className="text-red-600">admin@synergy.com</strong> et le mot de passe <strong className="text-red-600">Synergy@2026</strong>. Une fois activé, connectez-vous en écrivant simplement <strong className="text-[#14120E]">Admin</strong> comme identifiant.
+                </p>
+              </div>
+            )}
+          </div>
 
           <p className="mt-6 text-center text-[10px] text-[#B0ADA5] font-bold uppercase tracking-widest leading-loose">
             Vos données sont chiffrées & stockées en Tunisie (Cloud Global).
