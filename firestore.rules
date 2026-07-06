@@ -1,0 +1,179 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // User Access Helpers
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAppOwner() {
+      return isSignedIn() && (
+        request.auth.token.email == 'hivefivetunisie@gmail.com' || 
+        request.auth.token.email == 'ryadmerarbi18@gmail.com' || 
+        request.auth.token.email == 'dhouha.laserostop@gmail.com' ||
+        request.auth.uid == 'wUnrzmVwqeNweY0YOO3UxXujmRD3'
+      );
+    }
+    function isAdmin() {
+      return isAppOwner() || (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'admin');
+    }
+    function isApproved() {
+      return isAppOwner() || (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().status == 'active');
+    }
+    function isOwner(res) {
+      return isSignedIn() && (res.data.ownerId == request.auth.uid || isAdmin());
+    }
+    function hasPermission(permission) {
+      return isAdmin() || (isApproved() && getUserData().permissions[permission] == true);
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (
+        request.auth.uid == uid || 
+        isAdmin() || 
+        (uid.startsWith('invite_') && request.auth.token.email != null && uid == 'invite_' + request.auth.token.email.lower())
+      );
+      allow list: if isAdmin();
+      allow create: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow update: if isAdmin() || (isSignedIn() && request.auth.uid == uid);
+      allow delete: if isAdmin() || (isSignedIn() && uid.startsWith('invite_') && request.auth.token.email != null && uid == 'invite_' + request.auth.token.email.lower());
+    }
+
+    match /pointings/{id} {
+      allow read: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
+      allow list: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
+      allow create, update: if isApproved() && hasPermission('canManageAttendance');
+      allow delete: if isAdmin();
+    }
+
+    match /monthly_adjustments/{id} {
+      allow read, list: if isApproved();
+      allow create, update: if isApproved() && (hasPermission('canManageAttendance') || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /employees/{id} {
+      allow read, list: if isApproved();
+      allow create, update: if isAdmin() || (isApproved() && hasPermission('canManageEmployees'));
+      allow delete: if isAdmin() || (isApproved() && hasPermission('canManageEmployees'));
+    }
+
+    match /operations/{id} {
+      allow read, list: if isApproved();
+      allow create, update: if isApproved() && hasPermission('canManageOperations');
+      allow delete: if isAdmin() || (isApproved() && hasPermission('canManageOperations'));
+    }
+
+    match /invoices/{invoiceId} {
+      allow read: if isApproved() && hasPermission('canViewFinancials');
+      allow create: if isApproved() && incoming().ownerId == request.auth.uid;
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isApproved() && isOwner(resource);
+    }
+
+    match /clients/{clientId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isAdmin() || (isApproved() && isOwner(resource));
+    }
+
+    match /purchases/{purchaseId} {
+      allow read: if isApproved() && hasPermission('canViewFinancials');
+      allow create: if isApproved() && incoming().ownerId == request.auth.uid;
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isApproved() && isOwner(resource);
+    }
+
+    match /articles/{articleId} {
+      allow read: if isApproved();
+      allow create: if isApproved();
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isAdmin() || (isApproved() && isOwner(resource));
+    }
+
+    match /issuers/{issuerId} {
+      allow read: if isApproved();
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if isApproved() && hasPermission('canViewFinancials');
+      allow create: if isApproved() && incoming().ownerId == request.auth.uid;
+      allow update: if isApproved() && isOwner(resource);
+      allow delete: if isApproved() && isOwner(resource);
+    }
+
+    match /spaces/{spaceId} {
+      allow read: if isApproved();
+      allow create: if isApproved() && hasPermission('canManageSpaces');
+      allow update: if isApproved() && (hasPermission('canManageSpaces') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /buvette_items/{itemId} {
+      allow read: if isApproved();
+      allow create: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette'));
+      allow update: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /buvette_sales/{saleId} {
+      allow read: if isApproved();
+      allow create: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette'));
+      allow update, delete: if isApproved() && isOwner(resource);
+    }
+
+    match /buvette_clients/{clientId} {
+      allow read, list: if isApproved();
+      allow create: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette'));
+      allow update: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /buvette_payments/{paymentId} {
+      allow read, list: if isApproved();
+      allow create: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette'));
+      allow update: if isApproved() && (hasPermission('canManageSales') || hasPermission('canManageBuvette') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /coworking_inventory/{itemId} {
+      allow read: if isApproved();
+      allow create: if isApproved() && hasPermission('canManageInventory');
+      allow update: if isApproved() && (hasPermission('canManageInventory') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /reservations/{reservationId} {
+      allow read, list: if isApproved();
+      allow create: if isApproved() && hasPermission('canManageSpaces');
+      allow update: if isApproved() && (hasPermission('canManageSpaces') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /maintenance_tasks/{taskId} {
+      allow read, list: if isApproved();
+      allow create: if isApproved();
+      allow update: if isApproved() && (hasPermission('canManageSpaces') || isOwner(resource));
+      allow delete: if isApproved() && (isAdmin() || isOwner(resource));
+    }
+
+    match /leave_requests/{id} {
+      allow read, list: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
+      allow create, update: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
+      allow delete: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner() || isAdmin());
+    }
+  }
+}

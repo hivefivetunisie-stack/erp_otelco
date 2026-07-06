@@ -1,0 +1,274 @@
+{
+  "entities": {
+    "Invoice": {
+      "title": "Invoice",
+      "description": "Sales invoice document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "dueDate": { "type": "string", "format": "date" },
+        "currency": { "type": "string" },
+        "bankAccountType": { "type": "string", "enum": ["dinars", "devises"] },
+        "notes": { "type": "string" },
+        "client": { "$ref": "#/entities/Client" },
+        "issuer": { "$ref": "#/entities/Issuer" },
+        "items": { "type": "array" },
+        "timbreFiscal": { "type": "number" },
+        "withholdingTaxRate": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "pending", "paid", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "number", "date", "client", "issuer", "items"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "Expense invoice document",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "supplier": { "type": "string" },
+        "mf": { "type": "string" },
+        "number": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "category": { "type": "string" },
+        "ht": { "type": "number" },
+        "tvaPct": { "type": "number" },
+        "tva": { "type": "number" },
+        "timbre": { "type": "number" },
+        "rsPct": { "type": "number" },
+        "rs": { "type": "number" },
+        "ttc": { "type": "number" },
+        "net": { "type": "number" },
+        "payment": { "type": "string" },
+        "notes": { "type": "string" },
+        "hasFile": { "type": "boolean" },
+        "fileName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "supplier", "date", "ht", "ttc"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Client information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "mf": { "type": "string" },
+        "rc": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "isProfessional": { "type": "boolean" },
+        "ville": { "type": "string" },
+        "cp": { "type": "string" },
+        "defaultRS": { "type": "number" },
+        "logoUrl": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "Product or service in the catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ref": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "tva": { "type": "number" },
+        "unit": { "type": "string" }
+      },
+      "required": ["id", "name", "price"]
+    },
+    "Issuer": {
+      "title": "Issuer",
+      "description": "Information about the company issuing the invoices",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "mf": { "type": "string" },
+        "rc": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "bankName": { "type": "string" },
+        "rib": { "type": "string" },
+        "iban": { "type": "string" },
+        "swift": { "type": "string" },
+        "capital": { "type": "string" },
+        "bankAccounts": { "type": "object" }
+      }
+    },
+    "MonthlyAdjustment": {
+      "title": "MonthlyAdjustment",
+      "description": "Employee performance bonuses, salary advances, and tardiness penalties per month",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "issuerId": { "type": "string" },
+        "month": { "type": "string" },
+        "bonus": { "type": "number" },
+        "advance": { "type": "number" },
+        "delay": { "type": "number" },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "employeeId", "issuerId", "month", "bonus", "advance"]
+    },
+    "BuvetteClient": {
+      "title": "BuvetteClient",
+      "description": "Clients of the Buvette/Snack who pay at the end of the month",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "balance": { "type": "number" },
+        "issuerId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "balance", "issuerId"]
+    },
+    "BuvettePayment": {
+      "title": "BuvettePayment",
+      "description": "Payments made by Buvette clients to clear their balance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "clientId": { "type": "string" },
+        "amount": { "type": "number" },
+        "paymentMethod": { "type": "string" },
+        "date": { "type": "string" },
+        "issuerId": { "type": "string" },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["id", "clientId", "amount", "paymentMethod", "date", "issuerId"]
+    },
+    "MeetingReservation": {
+      "title": "MeetingReservation",
+      "description": "Meeting room reservations linked with Google Calendar",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "spaceId": { "type": "string" },
+        "spaceName": { "type": "string" },
+        "clientId": { "type": "string" },
+        "clientName": { "type": "string" },
+        "clientEmail": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "gcalEventId": { "type": "string" },
+        "issuerId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "spaceId", "spaceName", "clientName", "clientEmail", "title", "date", "startTime", "endTime", "issuerId"]
+    },
+    "MaintenanceTask": {
+      "title": "MaintenanceTask",
+      "description": "Maintenance work or equipment repair task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["repair", "maintenance", "work", "other"] },
+        "targetType": { "type": "string", "enum": ["equipment", "space", "general"] },
+        "targetId": { "type": "string" },
+        "targetName": { "type": "string" },
+        "status": { "type": "string", "enum": ["planned", "todo", "in_progress", "done"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "date": { "type": "string", "format": "date" },
+        "notes": { "type": "string" },
+        "cost": { "type": "number" },
+        "issuerId": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "type", "targetType", "targetName", "status", "priority", "date", "issuerId"]
+    },
+    "LeaveRequest": {
+      "title": "LeaveRequest",
+      "description": "Employee leave or vacation request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "issuerId": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "type": { "type": "string", "enum": ["payé", "maladie", "récupération", "sans_solde"] },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "reason": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "employeeId", "issuerId", "startDate", "endDate", "type", "status"]
+    }
+  },
+  "firestore": {
+    "leave_requests/{leaveId}": {
+      "schema": "LeaveRequest",
+      "description": "Collection of employee leave and vacation requests"
+    },
+    "invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Collection of sales invoices"
+    },
+    "purchases/{purchaseId}": {
+      "schema": "Purchase",
+      "description": "Collection of expense invoices"
+    },
+    "clients/{clientId}": {
+      "schema": "Client",
+      "description": "Collection of clients"
+    },
+    "articles/{articleId}": {
+      "schema": "Article",
+      "description": "Collection of catalog items"
+    },
+    "issuers/{issuerId}": {
+      "schema": "Issuer",
+      "description": "Collection of multiple companies/issuers managed by the user"
+    },
+    "employees/{employeeId}": {
+      "schema": "Employee",
+      "description": "Collection of employees per company"
+    },
+    "operations/{operationId}": {
+      "schema": "Operation",
+      "description": "Catalog of production operations with hourly rates"
+    },
+    "pointings/{pointingId}": {
+      "schema": "Pointing",
+      "description": "Daily work logs and absences for employees"
+    },
+    "monthly_adjustments/{adjustmentId}": {
+      "schema": "MonthlyAdjustment",
+      "description": "Monthly bonuses, advances, and delays for employees"
+    },
+    "buvette_clients/{clientId}": {
+      "schema": "BuvetteClient",
+      "description": "Buvette/Snack deferred payment clients"
+    },
+    "buvette_payments/{paymentId}": {
+      "schema": "BuvettePayment",
+      "description": "Buvette/Snack client account clearance payments"
+    },
+    "reservations/{reservationId}": {
+      "schema": "MeetingReservation",
+      "description": "Meeting room reservation and calendar synchronization events"
+    },
+    "maintenance_tasks/{taskId}": {
+      "schema": "MaintenanceTask",
+      "description": "Collection of maintenance, repair, and planned works"
+    }
+  }
+}
