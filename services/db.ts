@@ -144,7 +144,7 @@ function sanitizeForTable(tableName: string, obj: any): any {
 }
 
 // 2. Compatibility writes
-export async function setDoc(docRef: any, data: any): Promise<void> {
+export async function setDoc(docRef: any, data: any, options?: any): Promise<void> {
   const cleaned = cleanData(data);
   if (isMockRef(docRef)) {
     const supabase = getSupabaseClient();
@@ -159,7 +159,7 @@ export async function setDoc(docRef: any, data: any): Promise<void> {
     const { error } = await supabase.from(mapping.table).upsert(payload, { onConflict: mapping.pk });
     if (error) throw new Error(error.message);
   } else {
-    await realSetDoc(docRef, data);
+    await realSetDoc(docRef, data, options);
   }
 }
 

@@ -164,7 +164,7 @@ const Layout: React.FC<LayoutProps> = ({
           {(profile?.permissions?.canManageAttendance || profile?.role === 'admin') && (
             <NavItem 
               icon={<Clock size={16} />} 
-              label="Pointage Personnel" 
+              label="Pointage & Employés" 
               active={activeView === 'pointage'} 
               onClick={() => handleNavClick('pointage')} 
             />

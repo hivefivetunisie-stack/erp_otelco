@@ -206,10 +206,20 @@ const PointingSystem: React.FC<PointingSystemProps> = ({ selectedIssuerIds, issu
               pointings={pointings}
               issuers={issuers}
               onSave={async (p) => {
-                await setDoc(doc(db, 'pointings', p.id), p);
+                try {
+                  await setDoc(doc(db, 'pointings', p.id), p);
+                } catch (err: any) {
+                  alert("Erreur lors de la sauvegarde du pointage: " + err.message);
+                  throw err; // rethrow so that the calling component knows it failed
+                }
               }}
               onDelete={async (id) => {
-                await deleteDoc(doc(db, 'pointings', id));
+                try {
+                  await deleteDoc(doc(db, 'pointings', id));
+                } catch (err: any) {
+                  alert("Erreur lors de la suppression du pointage: " + err.message);
+                  throw err;
+                }
               }}
             />
           </motion.div>
@@ -239,7 +249,11 @@ const PointingSystem: React.FC<PointingSystemProps> = ({ selectedIssuerIds, issu
               adjustments={adjustments}
               issuers={issuers}
               onSaveAdjustment={async (adj: MonthlyAdjustment) => {
-                await setDoc(doc(db, 'monthly_adjustments', adj.id), adj);
+                try {
+                  await setDoc(doc(db, 'monthly_adjustments', adj.id), adj);
+                } catch (err: any) {
+                  alert("Erreur lors de la modification de l'ajustement: " + err.message);
+                }
               }}
             />
           </motion.div>
@@ -389,8 +403,20 @@ const PointingSystem: React.FC<PointingSystemProps> = ({ selectedIssuerIds, issu
               employees={employees}
               issuers={issuers}
               selectedIssuerIds={selectedIssuerIds}
-              onAdd={async (o) => await setDoc(doc(db, 'operations', o.id), o)}
-              onUpdate={async (o) => await updateDoc(doc(db, 'operations', o.id), { ...o } as any)}
+              onAdd={async (o) => {
+                try {
+                  await setDoc(doc(db, 'operations', o.id), o);
+                } catch (err: any) {
+                  alert("Erreur lors de l'ajout de l'opération: " + err.message);
+                }
+              }}
+              onUpdate={async (o) => {
+                try {
+                  await updateDoc(doc(db, 'operations', o.id), { ...o } as any);
+                } catch (err: any) {
+                  alert("Erreur lors de la modification de l'opération: " + err.message);
+                }
+              }}
               onDelete={async (id, skipConfirm = false) => {
                 const op = operations.find(o => o.id === id);
                 if (!id) {
@@ -432,20 +458,26 @@ const DailyPointing = ({ date, onDateChange, employees, operations, pointings, o
 
   const handleQuickSave = async (empId: string, issuerId: string, hours: number, type: PointingType, opId: string) => {
     setIsSaving(empId);
-    const existing = pointingsForDate.find((p: any) => p.employeeId === empId);
-    const id = existing?.id || `p-${empId}-${date}`;
-    
-    await onSave({
-      id,
-      employeeId: empId,
-      issuerId,
-      date,
-      hours,
-      type,
-      operationId: opId || '',
-      updatedAt: new Date().toISOString()
-    });
-    setIsSaving(null);
+    try {
+      const existing = pointingsForDate.find((p: any) => p.employeeId === empId);
+      const id = existing?.id || `p-${empId}-${date}`;
+      
+      await onSave({
+        id,
+        employeeId: empId,
+        issuerId,
+        date,
+        hours,
+        type,
+        operationId: opId || '',
+        updatedAt: new Date().toISOString()
+      });
+    } catch (err: any) {
+      console.error("Erreur de pointage:", err);
+      alert("Erreur de pointage: " + (err.message || err));
+    } finally {
+      setIsSaving(null);
+    }
   };
 
   const markAllPresent = async () => {
