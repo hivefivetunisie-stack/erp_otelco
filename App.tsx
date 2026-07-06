@@ -510,6 +510,17 @@ const App: React.FC = () => {
 
   const [invoice, setInvoice] = useState<Invoice>(createInitialInvoice);
 
+  // Synchronize new draft invoices with primary/active issuer selection changes
+  useEffect(() => {
+    if (invoice && invoice.id.startsWith('inv-') && primaryIssuer && invoice.issuer.id !== primaryIssuer.id) {
+      setInvoice(prev => ({
+        ...prev,
+        issuer: primaryIssuer,
+        notes: prev.notes.replace(prev.issuer.name, primaryIssuer.name)
+      }));
+    }
+  }, [primaryIssuer]);
+
   const handleSaveInvoice = async () => {
     try {
       // Force status to paid for receipts and cash sales
@@ -719,7 +730,7 @@ const App: React.FC = () => {
                     isChecking={isChecking}
                     clients={clients}
                     articles={articles}
-                    issuers={issuers}
+                    issuers={userIssuers}
                   />
                 </div>
                 <div className="xl:col-span-4 hidden xl:block">
@@ -896,6 +907,21 @@ const App: React.FC = () => {
             onSaveIssuer={async (newIssuer) => {
               try {
                 await setDoc(doc(db, 'issuers', newIssuer.id), newIssuer);
+                
+                // Instantly select and activate the new company in the active view
+                setSelectedIssuerIds(prev => {
+                  if (prev.includes(newIssuer.id)) return prev;
+                  return [...prev, newIssuer.id];
+                });
+
+                // Authorize user for this new company if they have a custom role with limited list
+                if (user && profile) {
+                  const currentIds = profile.issuerIds || [];
+                  if (!currentIds.includes(newIssuer.id)) {
+                    const updatedIds = [...currentIds, newIssuer.id];
+                    await updateDoc(doc(db, 'users', user.uid), { issuerIds: updatedIds });
+                  }
+                }
               } catch (error) {
                 handleFirestoreError(error, FSOperationType.WRITE, 'issuers/' + newIssuer.id);
               }

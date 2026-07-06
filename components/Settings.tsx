@@ -66,7 +66,7 @@ const Settings: React.FC<SettingsProps> = ({ issuers, activeId, onSetActive, onS
   });
 
   const activeIssuer = issuers.find(i => i.id === activeId) || {
-    id: 'iss-' + Date.now(),
+    id: activeId.startsWith('new-') ? activeId.replace('new-', 'iss-') : (activeId || 'iss-' + Date.now()),
     name: '',
     address: '',
     mf: '',
