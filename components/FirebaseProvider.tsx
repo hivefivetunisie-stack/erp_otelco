@@ -280,26 +280,6 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[#F1EFEA] text-left">
-            <h3 className="flex items-center gap-1.5 text-[11px] font-black text-[#1A56DB] uppercase tracking-widest mb-2">
-              <Database size={12} /> Mode de Connexion : {provider === 'supabase' ? 'Supabase' : 'Firebase'}
-            </h3>
-            <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3 text-[11px] leading-relaxed text-[#475569]">
-              <span className="font-bold text-[#1e293b]">💡 Comment configurer vos accès :</span>
-              <ul className="list-disc pl-4 mt-1 space-y-1">
-                <li>
-                  Sur votre tableau de bord <strong>Supabase</strong>, allez dans <strong>Authentication</strong> &gt; <strong>Users</strong>.
-                </li>
-                <li>
-                  Ajoutez un utilisateur avec l'adresse email <code className="bg-[#EDF2F7] px-1.5 py-0.5 rounded font-mono text-[10px] text-red-600">admin@synergy.com</code> et le mot de passe <code className="bg-[#EDF2F7] px-1.5 py-0.5 rounded font-mono text-[10px] text-red-600">Synergy@2026</code>.
-                </li>
-                <li>
-                  Ensuite, vous pourrez vous connecter en écrivant simplement <strong className="text-[#14120E]">Admin</strong> ou l'adresse email complète.
-                </li>
-              </ul>
-            </div>
-          </div>
-
           <p className="mt-6 text-center text-[10px] text-[#B0ADA5] font-bold uppercase tracking-widest leading-loose">
             Vos données sont chiffrées & stockées en Tunisie (Cloud Global).
           </p>
