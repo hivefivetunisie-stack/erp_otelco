@@ -138,16 +138,19 @@ export const TABLES_INFO = [
   { collection: 'purchases', table: 'purchases', pk: 'id', label: 'Dépenses / Achats' },
   { collection: 'invoices', table: 'invoices', pk: 'id', label: 'Factures / Devis / Reçus' },
   { collection: 'subscriptions', table: 'subscriptions', pk: 'id', label: 'Abonnements' },
-  { collection: 'inventory', table: 'inventory', pk: 'id', label: 'Inventaire' },
+  { collection: 'coworking_inventory', table: 'inventory', pk: 'id', label: 'Inventaire d\'Espace' },
   { collection: 'spaces', table: 'spaces', pk: 'id', label: 'Espaces Coworking' },
-  { collection: 'buvetteItems', table: 'buvette_items', pk: 'id', label: 'Buvette - Articles' },
-  { collection: 'buvetteSales', table: 'buvette_sales', pk: 'id', label: 'Buvette - Ventes' },
-  { collection: 'buvetteClients', table: 'buvette_clients', pk: 'id', label: 'Buvette - Clients' },
-  { collection: 'buvettePayments', table: 'buvette_payments', pk: 'id', label: 'Buvette - Paiements' },
+  { collection: 'buvette_items', table: 'buvette_items', pk: 'id', label: 'Buvette - Articles' },
+  { collection: 'buvette_sales', table: 'buvette_sales', pk: 'id', label: 'Buvette - Ventes' },
+  { collection: 'buvette_clients', table: 'buvette_clients', pk: 'id', label: 'Buvette - Clients' },
+  { collection: 'buvette_payments', table: 'buvette_payments', pk: 'id', label: 'Buvette - Paiements' },
   { collection: 'employees', table: 'employees', pk: 'id', label: 'Employés' },
   { collection: 'pointings', table: 'pointings', pk: 'id', label: 'Pointages' },
   { collection: 'operations', table: 'operations', pk: 'id', label: 'Opérations' },
-  { collection: 'maintenanceTasks', table: 'maintenance_tasks', pk: 'id', label: 'Tâches de maintenance' },
+  { collection: 'maintenance_tasks', table: 'maintenance_tasks', pk: 'id', label: 'Tâches de maintenance' },
+  { collection: 'monthly_adjustments', table: 'monthly_adjustments', pk: 'id', label: 'Ajustements mensuels (Pointages)' },
+  { collection: 'leave_requests', table: 'leave_requests', pk: 'id', label: 'Demandes de congé (Pointages)' },
+  { collection: 'reservations', table: 'reservations', pk: 'id', label: 'Réservations de salles (Coworking)' }
 ];
 
 export async function migrateCollection(
@@ -440,6 +443,50 @@ CREATE TABLE IF NOT EXISTS "maintenance_tasks" (
   "createdAt" TEXT
 );
 
+-- 18. Table leave_requests
+CREATE TABLE IF NOT EXISTS "leave_requests" (
+  "id" TEXT PRIMARY KEY,
+  "employeeId" TEXT,
+  "issuerId" TEXT,
+  "startDate" TEXT,
+  "endDate" TEXT,
+  "type" TEXT,
+  "status" TEXT,
+  "reason" TEXT,
+  "createdAt" TEXT
+);
+
+-- 19. Table monthly_adjustments
+CREATE TABLE IF NOT EXISTS "monthly_adjustments" (
+  "id" TEXT PRIMARY KEY,
+  "employeeId" TEXT,
+  "issuerId" TEXT,
+  "month" TEXT,
+  "bonus" NUMERIC,
+  "advance" NUMERIC,
+  "delay" NUMERIC,
+  "notes" TEXT
+);
+
+-- 20. Table reservations
+CREATE TABLE IF NOT EXISTS "reservations" (
+  "id" TEXT PRIMARY KEY,
+  "spaceId" TEXT,
+  "spaceName" TEXT,
+  "clientId" TEXT,
+  "clientName" TEXT,
+  "clientEmail" TEXT,
+  "title" TEXT,
+  "description" TEXT,
+  "date" TEXT,
+  "startTime" TEXT,
+  "endTime" TEXT,
+  "gcalEventId" TEXT,
+  "issuerId" TEXT,
+  "ownerId" TEXT,
+  "createdAt" TEXT
+);
+
 -- Activer Row Level Security (RLS) sur toutes les tables
 ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "issuers" ENABLE ROW LEVEL SECURITY;
@@ -458,6 +505,9 @@ ALTER TABLE "employees" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "pointings" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "operations" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "maintenance_tasks" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "leave_requests" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "monthly_adjustments" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "reservations" ENABLE ROW LEVEL SECURITY;
 
 -- Autoriser un accès public complet ou pour les requêtes authentifiées à des fins de simplicité
 -- Vous pouvez ensuite affiner ces politiques de sécurité dans Supabase directement.
@@ -478,4 +528,7 @@ CREATE POLICY "Full access on employees" ON "employees" FOR ALL USING (true) WIT
 CREATE POLICY "Full access on pointings" ON "pointings" FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full access on operations" ON "operations" FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Full access on maintenance_tasks" ON "maintenance_tasks" FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Full access on leave_requests" ON "leave_requests" FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Full access on monthly_adjustments" ON "monthly_adjustments" FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Full access on reservations" ON "reservations" FOR ALL USING (true) WITH CHECK (true);
 `;

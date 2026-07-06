@@ -106,6 +106,43 @@ function isMockRef(ref: any): boolean {
   return ref && ref.isMock === true;
 }
 
+const TABLE_COLUMNS: { [table: string]: string[] } = {
+  'users': ['uid', 'email', 'displayName', 'role', 'employeeRole', 'status', 'permissions', 'issuerIds'],
+  'issuers': ['id', 'name', 'address', 'mf', 'rc', 'phone', 'email', 'logoUrl', 'bankAccounts', 'isDefault'],
+  'clients': ['id', 'name', 'address', 'mf', 'rc', 'phone', 'email', 'isProfessional', 'ville', 'cp', 'defaultRS', 'logoUrl', 'issuerId'],
+  'articles': ['id', 'ref', 'name', 'price', 'tva', 'unit', 'category'],
+  'purchases': ['id', 'vendor', 'date', 'dueDate', 'status', 'category', 'ht', 'tva', 'ttc', 'ref', 'issuerId', 'ownerId', 'imageUrl', 'driveFileUrl', 'driveFolderUrl', 'createdAt'],
+  'invoices': ['id', 'number', 'documentType', 'date', 'dueDate', 'issuer', 'client', 'items', 'timbreFiscal', 'withholdingTaxRate', 'currency', 'bankAccountType', 'notes', 'status', 'ownerId', 'driveFileUrl', 'driveFolderUrl', 'paymentMethod', 'chequeNumber', 'dateReceived', 'remainingBalance'],
+  'subscriptions': ['id', 'clientId', 'clientName', 'officeType', 'monthlyPrice', 'startDate', 'endDate', 'status', 'issuerId', 'ownerId', 'notes'],
+  'inventory': ['id', 'name', 'totalQuantity', 'availableQuantity', 'category', 'issuerId', 'ownerId'],
+  'spaces': ['id', 'name', 'type', 'capacity', 'equipment', 'issuerId', 'ownerId', 'status'],
+  'buvette_items': ['id', 'sku', 'name', 'price', 'stock', 'category', 'issuerId', 'ownerId'],
+  'buvette_sales': ['id', 'items', 'totalAmount', 'paymentMethod', 'clientId', 'date', 'issuerId', 'ownerId'],
+  'buvette_clients': ['id', 'name', 'phone', 'email', 'balance', 'issuerId', 'ownerId', 'createdAt'],
+  'buvette_payments': ['id', 'clientId', 'amount', 'paymentMethod', 'date', 'issuerId', 'ownerId'],
+  'employees': ['id', 'name', 'email', 'role', 'issuerId', 'operationId', 'status', 'cin', 'cnss', 'hireDate', 'salary', 'phone', 'address', 'birthDate', 'contractType'],
+  'pointings': ['id', 'employeeId', 'issuerId', 'date', 'type', 'hours', 'operationId', 'notes'],
+  'operations': ['id', 'name', 'hourlyRate', 'roleRates', 'issuerId'],
+  'maintenance_tasks': ['id', 'title', 'type', 'targetType', 'targetId', 'targetName', 'status', 'priority', 'date', 'notes', 'cost', 'issuerId', 'ownerId', 'createdAt'],
+  'leave_requests': ['id', 'employeeId', 'issuerId', 'startDate', 'endDate', 'type', 'status', 'reason', 'createdAt'],
+  'monthly_adjustments': ['id', 'employeeId', 'issuerId', 'month', 'bonus', 'advance', 'delay', 'notes'],
+  'reservations': ['id', 'spaceId', 'spaceName', 'clientId', 'clientName', 'clientEmail', 'title', 'description', 'date', 'startTime', 'endTime', 'gcalEventId', 'issuerId', 'ownerId', 'createdAt']
+};
+
+function sanitizeForTable(tableName: string, obj: any): any {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  const allowed = TABLE_COLUMNS[tableName];
+  if (!allowed) return obj;
+  
+  const result: any = {};
+  for (const key of Object.keys(obj)) {
+    if (allowed.includes(key)) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 // 2. Compatibility writes
 export async function setDoc(docRef: any, data: any): Promise<void> {
   const cleaned = cleanData(data);
@@ -117,7 +154,8 @@ export async function setDoc(docRef: any, data: any): Promise<void> {
     const mapping = COLLECTION_TO_TABLE[collectionName];
     if (!mapping) throw new Error(`Collection non répertoriée: ${collectionName}`);
     
-    const payload = { ...cleaned, [mapping.pk]: id };
+    const rawPayload = { ...cleaned, [mapping.pk]: id };
+    const payload = sanitizeForTable(mapping.table, rawPayload);
     const { error } = await supabase.from(mapping.table).upsert(payload, { onConflict: mapping.pk });
     if (error) throw new Error(error.message);
   } else {
@@ -135,7 +173,8 @@ export async function updateDoc(docRef: any, data: any): Promise<void> {
     const mapping = COLLECTION_TO_TABLE[collectionName];
     if (!mapping) throw new Error(`Collection non répertoriée: ${collectionName}`);
     
-    const { error } = await supabase.from(mapping.table).update(cleaned).eq(mapping.pk, id);
+    const payload = sanitizeForTable(mapping.table, cleaned);
+    const { error } = await supabase.from(mapping.table).update(payload).eq(mapping.pk, id);
     if (error) throw new Error(error.message);
   } else {
     await realUpdateDoc(docRef, data);
@@ -204,7 +243,18 @@ export function onSnapshot(
       const fetchAndNotify = async () => {
         try {
           const { data, error } = await supabase.from(mapping.table).select('*').eq(mapping.pk, id).maybeSingle();
-          if (error) throw error;
+          if (error) {
+            if (error.code === '42P01') {
+              console.warn(`Table "${mapping.table}" does not exist yet in Supabase. Returning empty doc.`);
+              if (!isSubscribed) return;
+              onNext({
+                exists: () => false,
+                data: () => null
+              });
+              return;
+            }
+            throw error;
+          }
           if (!isSubscribed) return;
 
           onNext({
@@ -244,7 +294,15 @@ export function onSnapshot(
           }
 
           const { data, error } = await queryBuilder;
-          if (error) throw error;
+          if (error) {
+            if (error.code === '42P01') {
+              console.warn(`Table "${mapping.table}" does not exist yet in Supabase. Returning empty array.`);
+              if (!isSubscribed) return;
+              onNext({ docs: [] });
+              return;
+            }
+            throw error;
+          }
           if (!isSubscribed) return;
 
           const mockDocs = (data || []).map(row => ({
