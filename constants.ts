@@ -127,19 +127,19 @@ export const SERVEUR_USER_PERMISSIONS = {
 
 export const PREDEFINED_ARTICLES = [
   // Coworking Category - Space details for OTELCO Coworking Space
-  { id: 'pa-co01', ref: 'OTELCO-NOM', name: 'Desk Nomade (Coworking OTELCO - Bureau Partagé)', price: 25.000, tva: 19, unit: 'Jour', category: 'Coworking' },
-  { id: 'pa-co02', ref: 'OTELCO-FIX', name: 'Desk Fixe (Coworking OTELCO - Bureau Dédié)', price: 350.000, tva: 19, unit: 'Mois', category: 'Coworking' },
-  { id: 'pa-co03', ref: 'OTELCO-PRIV', name: 'Bureau Privatif Équipé (Coworking OTELCO)', price: 1200.000, tva: 19, unit: 'Mois', category: 'Coworking' },
-  { id: 'pa-co04', ref: 'OTELCO-MEET', name: 'Salle de Réunion Équipée (Coworking OTELCO)', price: 45.000, tva: 19, unit: 'Heure', category: 'Coworking' },
-  { id: 'pa-co05', ref: 'OTELCO-DOM', name: 'Domiciliation d\'Entreprise Prestige (OTELCO)', price: 50.000, tva: 19, unit: 'Mois', category: 'Coworking' },
-  { id: 'pa-co06', ref: 'OTELCO-BEV', name: 'Pack Cafétéria & Buvette Premium (Mensuel)', price: 35.000, tva: 19, unit: 'Mois', category: 'Coworking' },
+  { id: 'pa-co01', ref: 'OTELCO-NOM', name: 'Desk Nomade (Coworking OTELCO - Bureau Partagé)', description: 'Accès libre à un poste de travail partagé avec internet THD en Wi-Fi, thé/café inclus.', price: 25.000, tva: 19, unit: 'Jour', category: 'Coworking' },
+  { id: 'pa-co02', ref: 'OTELCO-FIX', name: 'Desk Fixe (Coworking OTELCO - Bureau Dédié)', description: 'Poste de travail personnel réservé, casier sécurisé, quota d\'impressions et d\'heures de salle de réunion inclus.', price: 350.000, tva: 19, unit: 'Mois', category: 'Coworking' },
+  { id: 'pa-co03', ref: 'OTELCO-PRIV', name: 'Bureau Privatif Équipé (Coworking OTELCO)', description: 'Bureau fermé clé en main de 1 à 4 personnes, mobilier ergonomique, entretien quotidien, accès 24/7.', price: 1200.000, tva: 19, unit: 'Mois', category: 'Coworking' },
+  { id: 'pa-co04', ref: 'OTELCO-MEET', name: 'Salle de Réunion Équipée (Coworking OTELCO)', description: 'Salle climatisée, écran de projection 4K, pieuvre d\'audioconférence, tableau blanc interactif.', price: 45.000, tva: 19, unit: 'Heure', category: 'Coworking' },
+  { id: 'pa-co05', ref: 'OTELCO-DOM', name: 'Domiciliation d\'Entreprise Prestige (OTELCO)', description: 'Adresse de siège social prestigieuse, gestion et numérisation quotidienne du courrier avec alertes email.', price: 50.000, tva: 19, unit: 'Mois', category: 'Coworking' },
+  { id: 'pa-co06', ref: 'OTELCO-BEV', name: 'Pack Cafétéria & Buvette Premium (Mensuel)', description: 'Boissons chaudes illimitées (café expresso, thé) et accès à la sélection de collations sucrées/salées.', price: 35.000, tva: 19, unit: 'Mois', category: 'Coworking' },
 
   // Call Center Category - Service provision details for Synergy Growth
-  { id: 'pa-cc01', ref: 'SYNERGY-EMIS', name: 'Service d\'Émission d\'Appels - Prospection & Télévente', price: 15.500, tva: 19, unit: 'Heure', category: 'Call Center' },
-  { id: 'pa-cc02', ref: 'SYNERGY-RECEP', name: 'Service de Réception d\'Appels - Support Client & SAV', price: 14.000, tva: 19, unit: 'Heure', category: 'Call Center' },
-  { id: 'pa-cc03', ref: 'SYNERGY-QUALIF', name: 'Qualification de Fichiers & enrichissement de bases de données', price: 0.950, tva: 19, unit: 'Fiche', category: 'Call Center' },
-  { id: 'pa-cc04', ref: 'SYNERGY-RDV', name: 'Prise de Rendez-vous Qualifiés B2B', price: 45.000, tva: 19, unit: 'RDV', category: 'Call Center' },
-  { id: 'pa-cc05', ref: 'SYNERGY-FORFAIT', name: 'Prestation Forfaitaire Campagne Outsourcing Call Center', price: 2500.000, tva: 19, unit: 'Forfait', category: 'Call Center' },
-  { id: 'pa-cc06', ref: 'SYNERGY-AUDIT', name: 'Audit de script, formation d\'agents & supervision experte', price: 450.000, tva: 19, unit: 'Jour', category: 'Call Center' },
+  { id: 'pa-cc01', ref: 'SYNERGY-EMIS', name: 'Service d\'Émission d\'Appels - Prospection & Télévente', description: 'Prospection téléphonique ciblée, télévente d\'offres de services et relances commerciales par des téléconseillers qualifiés.', price: 15.500, tva: 19, unit: 'Heure', category: 'Call Center' },
+  { id: 'pa-cc02', ref: 'SYNERGY-RECEP', name: 'Service de Réception d\'Appels - Support Client & SAV', description: 'Gestion de la relation client multicanale, hotline d\'assistance technique et service après-vente dédié.', price: 14.000, tva: 19, unit: 'Heure', category: 'Call Center' },
+  { id: 'pa-cc03', ref: 'SYNERGY-QUALIF', name: 'Qualification de Fichiers & enrichissement de bases de données', description: 'Mise à jour et qualification de fiches prospects B2B/B2C, validation des informations de contact et d\'intention d\'achat.', price: 0.950, tva: 19, unit: 'Fiche', category: 'Call Center' },
+  { id: 'pa-cc04', ref: 'SYNERGY-RDV', name: 'Prise de Rendez-vous Qualifiés B2B', description: 'Planification d\'entretiens d\'affaires ou de démonstrations avec des décideurs qualifiés selon votre cahier des charges.', price: 45.000, tva: 19, unit: 'RDV', category: 'Call Center' },
+  { id: 'pa-cc05', ref: 'SYNERGY-FORFAIT', name: 'Prestation Forfaitaire Campagne Outsourcing Call Center', description: 'Lancement et gestion complète de campagne d\'externalisation comprenant script, tests d\'appels, reporting régulier et KPI.', price: 2500.000, tva: 19, unit: 'Forfait', category: 'Call Center' },
+  { id: 'pa-cc06', ref: 'SYNERGY-AUDIT', name: 'Audit de script, formation d\'agents & supervision experte', description: 'Analyse et amélioration de vos guides d\'entretien, coaching continu de vos équipes internes et rapports de performance.', price: 450.000, tva: 19, unit: 'Jour', category: 'Call Center' },
 ];
 

@@ -94,10 +94,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
   };
 
   const selectArticleForItem = (itemId: string, article: Article) => {
+    const itemDescription = article.description 
+      ? `${article.name} - ${article.description}`
+      : article.name;
+
     const newItems = invoice.items.map(item => 
       item.id === itemId ? { 
         ...item, 
-        description: article.name, 
+        description: itemDescription, 
         unitPrice: article.price, 
         tvaRate: article.tva 
       } : item
@@ -517,9 +521,14 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
                               onClick={() => selectArticleForItem(item.id, art)}
                               className="p-3 text-[10px] hover:bg-[#FAF8F4] cursor-pointer flex justify-between items-center"
                             >
-                              <div className="flex flex-col gap-0.5">
+                              <div className="flex flex-col gap-0.5 max-w-[70%]">
                                 <span className="font-bold text-[#14120E]">{art.name}</span>
                                 <span className="text-[8px] font-mono text-[#7A776F]">{art.ref} • {art.category || 'Autres'}</span>
+                                {art.description && (
+                                  <span className="text-[8px] text-[#7A776F] truncate" title={art.description}>
+                                    {art.description}
+                                  </span>
+                                )}
                               </div>
                               <div className="text-[#1A56DB] font-mono font-bold">{art.price.toFixed(3)} DT</div>
                             </div>

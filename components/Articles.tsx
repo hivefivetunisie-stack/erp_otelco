@@ -39,6 +39,7 @@ const Articles: React.FC<ArticlesProps> = ({ articles, onAddArticle, onUpdateArt
             id: pa.id + '-' + Date.now(),
             ref: pa.ref,
             name: pa.name,
+            description: pa.description || '',
             price: pa.price,
             tva: pa.tva,
             unit: pa.unit,
@@ -56,6 +57,7 @@ const Articles: React.FC<ArticlesProps> = ({ articles, onAddArticle, onUpdateArt
       id: 'art-' + Date.now(),
       ref: '',
       name: '',
+      description: '',
       price: 0,
       tva: 19,
       unit: 'Unité',
@@ -160,10 +162,17 @@ const Articles: React.FC<ArticlesProps> = ({ articles, onAddArticle, onUpdateArt
                     <tr key={article.id} className="hover:bg-[#FAF8F4] transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-[#FAF8F4] border border-[#E4E0D8] text-[#7A776F] flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-[#FAF8F4] border border-[#E4E0D8] text-[#7A776F] flex-shrink-0 flex items-center justify-center">
                             <Tag size={12} />
                           </div>
-                          <span className="font-bold text-[#14120E]">{article.name}</span>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-[#14120E]">{article.name}</span>
+                            {article.description && (
+                              <span className="text-[10px] text-[#7A776F] font-normal mt-0.5 line-clamp-1 max-w-[250px]" title={article.description}>
+                                {article.description}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-5 py-4">
@@ -256,6 +265,7 @@ const Articles: React.FC<ArticlesProps> = ({ articles, onAddArticle, onUpdateArt
                               ...currentArticle,
                               ref: model.ref,
                               name: model.name,
+                              description: model.description || '',
                               price: model.price,
                               tva: model.tva,
                               unit: model.unit,
@@ -313,6 +323,16 @@ const Articles: React.FC<ArticlesProps> = ({ articles, onAddArticle, onUpdateArt
                     onChange={e => setCurrentArticle({...currentArticle, name: e.target.value})}
                     placeholder="Ex: Laptop Dell XPS"
                     className={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyle}>Description (optionnelle)</label>
+                  <textarea 
+                    value={currentArticle.description || ''}
+                    onChange={e => setCurrentArticle({...currentArticle, description: e.target.value})}
+                    placeholder="Ex: Spécifications techniques, détails de l'abonnement ou conditions d'accès..."
+                    className={`${inputStyle} h-20 resize-none py-2.5`}
                   />
                 </div>
 

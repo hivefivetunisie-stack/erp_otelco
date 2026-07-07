@@ -1,6 +1,8 @@
 {
-  "name": "My Hive Five",
-  "description": "Solution complète de facturation conforme à la Loi de Finances Tunisie 2026. Gestion de clients, catalogue d'articles, analyse IA de conformité, et stockage cloud sécurisé.",
+  "name": "Remix: Copy of FacturaTN Pro - Solution de Facturation Tunisie",
+  "description": "Système de facturation conforme (LF 2026) avec génération PDF HD via html2pdf et archivage cloud sur Google Drive.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

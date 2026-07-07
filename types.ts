@@ -35,6 +35,7 @@ export interface Article {
   id: string;
   ref: string;
   name: string;
+  description?: string;
   price: number;
   tva: number;
   unit: string;

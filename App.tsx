@@ -245,13 +245,15 @@ const App: React.FC = () => {
 
     // Profile listener
     const unsubProfile = onSnapshot(doc(db, 'users', user.uid), async (snapshot) => {
-      const isAdminEmail = user.email === 'hivefivetunisie@gmail.com' || user.email === 'admin@synergy.com';
+      const isAdminEmail = user.email === 'hivefivetunisie@gmail.com' || user.email === 'admin@synergy.com' || user.email === 'contact.synergycall@gmail.com';
       const isManagerEmail = user.email === 'ryadmerarbi18@gmail.com' || user.email === 'dhouha.laserostop@gmail.com';
 
       if (snapshot.exists()) {
         const data = snapshot.data() as UserProfile;
         // Auto-upgrade owner/managers if needed
-        if ((isAdminEmail || isManagerEmail) && (data.status === 'pending' || (isAdminEmail && data.role !== 'admin') || (isManagerEmail && data.role !== 'manager'))) {
+        const needsUpgrade = (isAdminEmail && (data.role !== 'admin' || data.status !== 'active')) || 
+                            (isManagerEmail && (data.role !== 'manager' || data.status !== 'active'));
+        if (needsUpgrade) {
            const upgraded = {
              ...data,
              role: isAdminEmail ? ('admin' as const) : ('manager' as const),

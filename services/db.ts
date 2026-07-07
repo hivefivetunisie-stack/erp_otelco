@@ -37,7 +37,8 @@ const COLLECTION_TO_TABLE: { [key: string]: { table: string, pk: string } } = {
 
 // Deep clone serializer to clean up Firestore Timestamps, Dates, etc.
 function cleanData(obj: any): any {
-  if (obj === null || obj === undefined) return obj;
+  if (obj === null) return null;
+  if (obj === undefined) return undefined;
   if (typeof obj === 'object') {
     if (obj.seconds !== undefined && obj.nanoseconds !== undefined && typeof obj.toDate === 'function') {
       return obj.toDate().toISOString();
@@ -49,12 +50,15 @@ function cleanData(obj: any): any {
       return obj.toISOString();
     }
     if (Array.isArray(obj)) {
-      return obj.map(item => cleanData(item));
+      return obj.map(item => cleanData(item)).filter(item => item !== undefined);
     }
     
     const result: any = {};
     for (const key of Object.keys(obj)) {
-      result[key] = cleanData(obj[key]);
+      const val = cleanData(obj[key]);
+      if (val !== undefined) {
+        result[key] = val;
+      }
     }
     return result;
   }
@@ -159,7 +163,7 @@ export async function setDoc(docRef: any, data: any, options?: any): Promise<voi
     const { error } = await supabase.from(mapping.table).upsert(payload, { onConflict: mapping.pk });
     if (error) throw new Error(error.message);
   } else {
-    await realSetDoc(docRef, data, options);
+    await realSetDoc(docRef, cleaned, options);
   }
 }
 
@@ -177,7 +181,7 @@ export async function updateDoc(docRef: any, data: any): Promise<void> {
     const { error } = await supabase.from(mapping.table).update(payload).eq(mapping.pk, id);
     if (error) throw new Error(error.message);
   } else {
-    await realUpdateDoc(docRef, data);
+    await realUpdateDoc(docRef, cleaned);
   }
 }
 

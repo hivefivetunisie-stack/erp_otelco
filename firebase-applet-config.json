@@ -1,10 +1,10 @@
 {
-  "projectId": "lyrical-shell-107pf",
-  "appId": "1:996228384612:web:af54e8944a296b0fcc9c71",
-  "apiKey": "AIzaSyDPVq2HDnoLMmKSMM9ttBovUlPuLKU_HHs",
-  "authDomain": "lyrical-shell-107pf.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-8291948a-e2ce-4dcb-8a76-afb79d471e7d",
-  "storageBucket": "lyrical-shell-107pf.firebasestorage.app",
-  "messagingSenderId": "996228384612",
+  "projectId": "gen-lang-client-0981611215",
+  "appId": "1:386412469200:web:f9c38f5f64b81ecd2fb7d5",
+  "apiKey": "AIzaSyBYBfSh-WP1WVJHo3wg4iwMqSCElXrw20A",
+  "authDomain": "gen-lang-client-0981611215.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-remixcopyoffactu-4e2aa67d-59c9-4f6b-b840-439474bb2ac5",
+  "storageBucket": "gen-lang-client-0981611215.firebasestorage.app",
+  "messagingSenderId": "386412469200",
   "measurementId": ""
 }

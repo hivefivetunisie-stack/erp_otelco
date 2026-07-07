@@ -18,10 +18,13 @@ service cloud.firestore {
     }
     function isAppOwner() {
       return isSignedIn() && (
-        request.auth.token.email == 'hivefivetunisie@gmail.com' || 
-        request.auth.token.email == 'ryadmerarbi18@gmail.com' || 
-        request.auth.token.email == 'dhouha.laserostop@gmail.com' ||
-        request.auth.uid == 'wUnrzmVwqeNweY0YOO3UxXujmRD3'
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'hivefivetunisie@gmail.com') || 
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'ryadmerarbi18@gmail.com') || 
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'dhouha.laserostop@gmail.com') ||
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'contact.synergycall@gmail.com') ||
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'admin@synergy.com') ||
+        request.auth.uid == 'wUnrzmVwqeNweY0YOO3UxXujmRD3' ||
+        request.auth.uid == 'X7o0IgppSQT9O9vfgf7ZEZsyKYB3'
       );
     }
     function isAdmin() {
@@ -53,13 +56,13 @@ service cloud.firestore {
       allow read: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
       allow list: if isApproved() && (hasPermission('canManageAttendance') || isAppOwner());
       allow create, update: if isApproved() && hasPermission('canManageAttendance');
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || hasPermission('canManageAttendance');
     }
 
     match /monthly_adjustments/{id} {
       allow read, list: if isApproved();
       allow create, update: if isApproved() && (hasPermission('canManageAttendance') || isAdmin());
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || hasPermission('canManageAttendance');
     }
 
     match /employees/{id} {
@@ -104,8 +107,8 @@ service cloud.firestore {
 
     match /issuers/{issuerId} {
       allow read: if isApproved();
-      allow create, update: if isAdmin();
-      allow delete: if isAdmin();
+      allow create, update: if isApproved();
+      allow delete: if isAdmin() || hasPermission('canManageSettings');
     }
 
     match /subscriptions/{subscriptionId} {

@@ -77,6 +77,8 @@
         "id": { "type": "string" },
         "ref": { "type": "string" },
         "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
         "price": { "type": "number" },
         "tva": { "type": "number" },
         "unit": { "type": "string" }

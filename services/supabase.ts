@@ -29,18 +29,7 @@ export function saveSupabaseConfig(config: SupabaseConfig) {
 }
 
 export function getDatabaseProvider(): 'firebase' | 'supabase' {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_SUPABASE_URL;
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_SUPABASE_ANON_KEY;
-  const defaultProvider = (envUrl && envKey) ? 'supabase' : 'firebase';
-
-  const provider = (localStorage.getItem(PROVIDER_KEY) as 'firebase' | 'supabase') || defaultProvider;
-  if (provider === 'supabase') {
-    const config = getSupabaseConfig();
-    if (!config.url || !config.anonKey) {
-      return 'firebase';
-    }
-  }
-  return provider;
+  return 'firebase';
 }
 
 export function setDatabaseProvider(provider: 'firebase' | 'supabase') {
